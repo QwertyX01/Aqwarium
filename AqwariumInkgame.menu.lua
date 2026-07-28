@@ -1,16 +1,16 @@
 -- =====================================================
---  AQWARIUM SCRIPT (с ожиданием загрузки)
---  Логотип + надпись, серая обводка, 4 вкладки
+--  AQWARIUM SCRIPT (с вкладками Game, Player, Misc, Combat)
+--  Логотип + надпись, серая обводка
 --  Скрывает "секунд", не трогает GUI игры
 -- =====================================================
 
--- Ждём полной загрузки игры
+-- Ждём загрузки
 repeat wait() until game:IsLoaded()
-wait(0.5) -- дополнительная задержка для надёжности
+wait(0.5)
 
 local player = game:GetService("Players").LocalPlayer
 if not player then
-    warn("Игрок не найден, перезапусти скрипт.")
+    warn("Игрок не найден")
     return
 end
 
@@ -79,7 +79,6 @@ local mainCorners = Instance.new("UICorner")
 mainCorners.CornerRadius = UDim.new(0, 12)
 mainCorners.Parent = mainFrame
 
--- Серая обводка
 local stroke = Instance.new("UIStroke")
 stroke.Color = Color3.fromRGB(120, 120, 120)
 stroke.Transparency = 0.5
@@ -87,7 +86,7 @@ stroke.Thickness = 1.5
 stroke.Parent = mainFrame
 
 -- ============================================================
---  HEADER (с логотипом и надписью)
+--  HEADER
 -- ============================================================
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
@@ -176,9 +175,9 @@ rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
 
 -- ============================================================
---  ВКЛАДКИ (Games, Players, Misc, Combat)
+--  ВКЛАДКИ (Game, Player, Misc, Combat)
 -- ============================================================
-local tabNames = {"Games", "Players", "Misc", "Combat"}
+local tabNames = {"Game", "Player", "Misc", "Combat"}   -- изменено
 local tabButtons = {}
 local rightContentFrames = {}
 
@@ -243,9 +242,9 @@ for name, btn in pairs(tabButtons) do
     end)
 end
 
-tabButtons["Games"].BackgroundColor3 = Color3.fromRGB(60, 60, 70)
-tabButtons["Games"].BackgroundTransparency = 0.1
-tabButtons["Games"].TextColor3 = Color3.fromRGB(255, 255, 255)
+tabButtons["Game"].BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+tabButtons["Game"].BackgroundTransparency = 0.1
+tabButtons["Game"].TextColor3 = Color3.fromRGB(255, 255, 255)
 
 -- ============================================================
 --  ФУТЕР
@@ -285,11 +284,11 @@ footerText.TextYAlignment = Enum.TextYAlignment.Center
 footerText.Parent = footer
 
 -- ============================================================
---  СКРЫВАЕМ НАДПИСЬ "секунд"
+--  СКРЫВАЕМ НАДПИСЬ "секунд" (включая "Game секунд" и "Игрок секунд")
 -- ============================================================
 local function hideSeconds()
     for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui:GetDescendants()) do
-        if v:IsA("TextLabel") and string.find(v.Text:lower(), "секунд") then
+        if v:IsA("TextLabel") and (string.find(v.Text:lower(), "секунд") or string.find(v.Text:lower(), "игрок") or string.find(v.Text:lower(), "game")) then
             v.Visible = false
             v.Text = ""
         end
@@ -298,10 +297,10 @@ end
 
 hideSeconds()
 game:GetService("Players").LocalPlayer.PlayerGui.DescendantAdded:Connect(function(child)
-    if child:IsA("TextLabel") and string.find(child.Text:lower(), "секунд") then
+    if child:IsA("TextLabel") and (string.find(child.Text:lower(), "секунд") or string.find(child.Text:lower(), "игрок") or string.find(child.Text:lower(), "game")) then
         child.Visible = false
         child.Text = ""
     end
 end)
 
-print("✅ AQWARIUM SCRIPT (с ожиданием загрузки) загружен!")
+print("✅ AQWARIUM SCRIPT (вкладки Game, Player, Misc, Combat) загружен!")
