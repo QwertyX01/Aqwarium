@@ -177,7 +177,7 @@ rightCorners.Parent = rightPanel
 -- ============================================================
 --  ВКЛАДКИ (Game, Player, Misc, Combat)
 -- ============================================================
-local tabNames = {"Game", "Player", "Misc", "Combat"}   -- изменено
+local tabNames = {"DDD", "DDD","DDD", "DDDD"}   -- изменено
 local tabButtons = {}
 local rightContentFrames = {}
 
