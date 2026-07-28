@@ -1,21 +1,13 @@
 -- =====================================================
---  AQWARIUM SCRIPT (ЧИСТАЯ ВЕРСИЯ)
+--  AQWARIUM SCRIPT (БЕЗОПАСНАЯ ВЕРСИЯ)
+--  НЕ УДАЛЯЕТ GUI ИГРЫ! Только своё меню.
 --  Tabs: Games, Players, Misc, Combat
---  Серый контур, 600x400
---  Скрывает игровой таймер "секунд"
+--  Скрывает игровой таймер ("секунд")
 -- =====================================================
 
 local player = game:GetService("Players").LocalPlayer
 
--- Удаляем всё старое
-for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
-    if v:IsA("ScreenGui") then v:Destroy() end
-end
-for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui:GetChildren()) do
-    if v:IsA("ScreenGui") then v:Destroy() end
-end
-wait(0.3)
-
+-- СОЗДАЁМ СВОЁ МЕНЮ (без удаления чужого)
 local gui = Instance.new("ScreenGui")
 gui.Name = "AqwariumScript"
 gui.ResetOnSpawn = false
@@ -92,7 +84,7 @@ local rightCorners = Instance.new("UICorner")
 rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
 
--- Вкладки
+-- Вкладки (Games, Players, Misc, Combat)
 local tabNames = {"Games", "Players", "Misc", "Combat"}
 local tabButtons = {}
 local rightContentFrames = {}
@@ -197,7 +189,7 @@ footerText.TextYAlignment = Enum.TextYAlignment.Center
 footerText.Parent = footer
 
 -- ============================================================
---  СКРЫВАЕМ ИГРОВОЙ ТАЙМЕР ("секунд")
+--  СКРЫВАЕМ ИГРОВОЙ ТАЙМЕР ("секунд") — НЕ ТРОГАЕМ ДРУГИЕ GUI
 -- ============================================================
 local function hideGameTimer()
     for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui:GetDescendants()) do
@@ -216,4 +208,4 @@ game:GetService("Players").LocalPlayer.PlayerGui.DescendantAdded:Connect(functio
     end
 end)
 
-print("✅ AQWARIUM SCRIPT (скрыт таймер) загружен!")
+print("✅ AQWARIUM SCRIPT (безопасный, управление не удаляется) загружен!")
