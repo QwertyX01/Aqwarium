@@ -1,10 +1,18 @@
 -- =====================================================
---  AQWARIUM SCRIPT (ПОЛНАЯ ВЕРСИЯ)
+--  AQWARIUM SCRIPT (с ожиданием загрузки)
 --  Логотип + надпись, серая обводка, 4 вкладки
---  Скрывает только "секунд", не трогает GUI игры
+--  Скрывает "секунд", не трогает GUI игры
 -- =====================================================
 
+-- Ждём полной загрузки игры
+repeat wait() until game:IsLoaded()
+wait(0.5) -- дополнительная задержка для надёжности
+
 local player = game:GetService("Players").LocalPlayer
+if not player then
+    warn("Игрок не найден, перезапусти скрипт.")
+    return
+end
 
 -- ============================================================
 --  ЗАГРУЗКА ЛОГОТИПА
@@ -49,7 +57,7 @@ elseif getgenv().getcustomasset then
 end
 
 -- ============================================================
---  СОЗДАЁМ МЕНЮ (без удаления интерфейса игры)
+--  СОЗДАЁМ МЕНЮ
 -- ============================================================
 local gui = Instance.new("ScreenGui")
 gui.Name = "AqwariumScript"
@@ -93,7 +101,7 @@ local headerCorners = Instance.new("UICorner")
 headerCorners.CornerRadius = UDim.new(0, 12)
 headerCorners.Parent = header
 
--- Логотип (слева)
+-- Логотип
 if logoPath then
     local logo = Instance.new("ImageLabel")
     logo.Name = "MenuLogoIcon"
@@ -113,7 +121,7 @@ else
     print("❌ Логотип не загружен")
 end
 
--- Надпись рядом с логотипом
+-- Надпись
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(0, 220, 1, 0)
 title.Position = UDim2.new(0, 48, 0, 0)
@@ -126,7 +134,7 @@ title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextYAlignment = Enum.TextYAlignment.Center
 title.Parent = header
 
--- Серая линия под заголовком
+-- Серая линия
 local headerLine = Instance.new("Frame")
 headerLine.Size = UDim2.new(1, 0, 0, 1)
 headerLine.Position = UDim2.new(0, 0, 0, 39)
@@ -136,7 +144,7 @@ headerLine.BorderSizePixel = 0
 headerLine.Parent = mainFrame
 
 -- ============================================================
---  ПАНЕЛИ (левая и правая)
+--  ПАНЕЛИ
 -- ============================================================
 local leftPanel = Instance.new("Frame")
 leftPanel.Size = UDim2.new(0.2, 0, 1, -40)
@@ -277,7 +285,7 @@ footerText.TextYAlignment = Enum.TextYAlignment.Center
 footerText.Parent = footer
 
 -- ============================================================
---  СКРЫВАЕМ ТОЛЬКО НАДПИСЬ "секунд" (без удаления GUI)
+--  СКРЫВАЕМ НАДПИСЬ "секунд"
 -- ============================================================
 local function hideSeconds()
     for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui:GetDescendants()) do
@@ -296,4 +304,4 @@ game:GetService("Players").LocalPlayer.PlayerGui.DescendantAdded:Connect(functio
     end
 end)
 
-print("✅ AQWARIUM SCRIPT (с логотипом и скрытием секунд) загружен!")
+print("✅ AQWARIUM SCRIPT (с ожиданием загрузки) загружен!")
