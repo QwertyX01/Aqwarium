@@ -177,7 +177,7 @@ rightCorners.Parent = rightPanel
 -- ============================================================
 --  ВКЛАДКИ (Game, Player, Misc, Combat)
 -- ============================================================
-local tabNames = {"Games", "Players","Combat", "Misc"}   -- изменено
+local tabNames = {"Game", "Player","Combat", "Misc"}   -- изменено
 local tabButtons = {}
 local rightContentFrames = {}
 
@@ -296,7 +296,7 @@ local function hideSeconds()
 end
 
 hideSeconds()
-game:GetService("Players").LocalPlayer.PlayerGui.DescendantAdded:Connect(function(child)
+game:GetService("Player").LocalPlayer.PlayerGui.DescendantAdded:Connect(function(child)
     if child:IsA("TextLabel") and (string.find(child.Text:lower(), "секунд") or string.find(child.Text:lower(), "игрок") or string.find(child.Text:lower(), "game")) then
         child.Visible = false
         child.Text = ""
