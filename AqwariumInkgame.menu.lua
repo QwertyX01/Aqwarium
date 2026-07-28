@@ -175,9 +175,9 @@ rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
 
 -- ============================================================
---  ВКЛАДКИ (Game, Player, Misc, Combat)
+--  ВКЛАДКИ (Game, Players, Misc, Combat)
 -- ============================================================
-local tabNames = {"Game", "Player","Combat", "Misc"}   -- изменено
+local tabNames = {"Game", "Players","Combat", "Misc"}   -- изменено
 local tabButtons = {}
 local rightContentFrames = {}
 
