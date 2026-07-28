@@ -282,25 +282,4 @@ footerText.Font = Enum.Font.GothamMedium
 footerText.TextXAlignment = Enum.TextXAlignment.Center
 footerText.TextYAlignment = Enum.TextYAlignment.Center
 footerText.Parent = footer
-
--- ============================================================
---  СКРЫВАЕМ НАДПИСЬ "секунд" (включая "Game секунд" и "Игрок секунд")
--- ============================================================
-local function hideSeconds()
-    for _, v in pairs(game:GetService("Player").LocalPlayer.PlayerGui:GetDescendants()) do
-        if v:IsA("TextLabel") and (string.find(v.Text:lower(), "секунд") or string.find(v.Text:lower(), "player") or string.find(v.Text:lower(), "game")) then
-            v.Visible = false
-            v.Text = ""
-        end
-    end
-end
-
-hideSeconds()
-game:GetService("Player").LocalPlayer.PlayerGui.DescendantAdded:Connect(function(child)
-    if child:IsA("TextLabel") and (string.find(child.Text:lower(), "секунд") or string.find(child.Text:lower(), "Player") or string.find(child.Text:lower(), "game")) then
-        child.Visible = false
-        child.Text = ""
-    end
-end)
-
 print("✅ AQWARIUM SCRIPT (вкладки Game, Player, Misc, Combat) загружен!")
