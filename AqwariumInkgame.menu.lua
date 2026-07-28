@@ -1,61 +1,26 @@
 -- =====================================================
---  AQWARIUM SCRIPT (Gotham шрифты)
---  Tabs: Games | Players | Misc | Combat
---  Footer: script By | tormentor412
---  LOGO 32x32 с закруглёнными углами
+--  AQWARIUM SCRIPT (ЧИСТАЯ ВЕРСИЯ)
+--  Tabs: Games, Players, Misc, Combat
+--  Серый контур, 600x400
+--  Скрывает игровой таймер "секунд"
 -- =====================================================
 
 local player = game:GetService("Players").LocalPlayer
+
+-- Удаляем всё старое
+for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+    if v:IsA("ScreenGui") then v:Destroy() end
+end
+for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui:GetChildren()) do
+    if v:IsA("ScreenGui") then v:Destroy() end
+end
+wait(0.3)
+
 local gui = Instance.new("ScreenGui")
 gui.Name = "AqwariumScript"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- ============================================================
---  ЗАГРУЗКА ЛОГОТИПА
--- ============================================================
-local imageUrl = "https://i.ibb.co/MkhPVnWs/Chat-GPT-Image-28-2026-14-13-59.png"
-local fileName = "menu_logo.png"
-local filePath = fileName
-
-local function fileExists(path)
-    local success, result = pcall(function()
-        return loadfile(path)
-    end)
-    return success and result ~= nil
-end
-
-if not fileExists(filePath) then
-    print("📥 Скачиваем логотип...")
-    local success, content = pcall(function()
-        return game:HttpGet(imageUrl, true)
-    end)
-    if success and content then
-        local writeSuccess, err = pcall(function()
-            writefile(filePath, content)
-        end)
-        if writeSuccess then
-            print("✅ Логотип сохранён: " .. filePath)
-        else
-            warn("⚠️ Не удалось сохранить файл: " .. tostring(err))
-        end
-    else
-        warn("⚠️ Не удалось скачать картинку")
-    end
-else
-    print("✅ Логотип уже есть на диске.")
-end
-
-local logoPath = nil
-if getcustomasset then
-    logoPath = getcustomasset(filePath)
-elseif getgenv().getcustomasset then
-    logoPath = getgenv().getcustomasset(filePath)
-end
-
--- ============================================================
---  ОСНОВНОЕ ОКНО МЕНЮ
--- ============================================================
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 600, 0, 400)
 mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
@@ -72,57 +37,24 @@ mainCorners.CornerRadius = UDim.new(0, 12)
 mainCorners.Parent = mainFrame
 
 local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(255, 255, 255)
-stroke.Transparency = 0.7
-stroke.Thickness = 1
+stroke.Color = Color3.fromRGB(120, 120, 120)
+stroke.Transparency = 0.5
+stroke.Thickness = 1.5
 stroke.Parent = mainFrame
 
--- ============================================================
---  HEADER
--- ============================================================
-local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 40)
-header.Position = UDim2.new(0, 0, 0, 0)
-header.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-header.BackgroundTransparency = 0.3
-header.BorderSizePixel = 0
-header.Parent = mainFrame
-
-local headerCorners = Instance.new("UICorner")
-headerCorners.CornerRadius = UDim.new(0, 12)
-headerCorners.Parent = header
-
--- Логотип
-if logoPath then
-    local logo = Instance.new("ImageLabel")
-    logo.Name = "MenuLogoIcon"
-    logo.Size = UDim2.new(0, 32, 0, 32)
-    logo.Position = UDim2.new(0, 8, 0, 4)
-    logo.BackgroundTransparency = 1
-    logo.BorderSizePixel = 0
-    logo.Image = logoPath
-    logo.ZIndex = 15
-    logo.Parent = header
-
-    local logoCorner = Instance.new("UICorner")
-    logoCorner.CornerRadius = UDim.new(0, 8)
-    logoCorner.Parent = logo
-end
-
--- Заголовок
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(0, 220, 1, 0)
-title.Position = UDim2.new(0, 48, 0, 0)
-title.BackgroundTransparency = 1
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+title.BackgroundTransparency = 0.3
+title.BorderSizePixel = 0
 title.Text = "AQWARIUM SCRIPT"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 22
 title.Font = Enum.Font.GothamBold
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.TextYAlignment = Enum.TextYAlignment.Center
-title.Parent = header
+title.TextXAlignment = Enum.TextXAlignment.Center
+title.Parent = mainFrame
 
--- Серая линия
 local headerLine = Instance.new("Frame")
 headerLine.Size = UDim2.new(1, 0, 0, 1)
 headerLine.Position = UDim2.new(0, 0, 0, 39)
@@ -131,9 +63,6 @@ headerLine.BackgroundTransparency = 0.4
 headerLine.BorderSizePixel = 0
 headerLine.Parent = mainFrame
 
--- ============================================================
---  PANELS
--- ============================================================
 local leftPanel = Instance.new("Frame")
 leftPanel.Size = UDim2.new(0.2, 0, 1, -40)
 leftPanel.Position = UDim2.new(0, 0, 0, 40)
@@ -142,10 +71,6 @@ leftPanel.BackgroundTransparency = 0
 leftPanel.BorderSizePixel = 0
 leftPanel.ClipsDescendants = true
 leftPanel.Parent = mainFrame
-
-local leftCorners = Instance.new("UICorner")
-leftCorners.CornerRadius = UDim.new(0, 6)
-leftCorners.Parent = leftPanel
 
 local layoutLeft = Instance.new("UIListLayout")
 layoutLeft.FillDirection = Enum.FillDirection.Vertical
@@ -167,13 +92,12 @@ local rightCorners = Instance.new("UICorner")
 rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
 
--- ============================================================
---  TABS (ПРАВИЛЬНЫЕ НАЗВАНИЯ: Games, Players, Misc, Combat)
--- ============================================================
+-- Вкладки
+local tabNames = {"Games", "Players", "Misc", "Combat"}
 local tabButtons = {}
-local tabNames = {"Games", "Players", "Misc", "Combat"}   -- <-- ИСПРАВЛЕНО
+local rightContentFrames = {}
 
-local function createTabButton(name)
+for i, name in ipairs(tabNames) do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.85, 0, 0, 30)
     btn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
@@ -184,11 +108,9 @@ local function createTabButton(name)
     btn.TextSize = 14
     btn.Font = Enum.Font.GothamMedium
     btn.Parent = leftPanel
-
     local btnCorners = Instance.new("UICorner")
     btnCorners.CornerRadius = UDim.new(0, 6)
     btnCorners.Parent = btn
-
     btn.MouseEnter:Connect(function()
         if btn.BackgroundTransparency > 0.1 then
             btn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
@@ -201,14 +123,6 @@ local function createTabButton(name)
             btn.BackgroundTransparency = 0.5
         end
     end)
-
-    return btn
-end
-
-local rightContentFrames = {}
-
-for i, name in ipairs(tabNames) do
-    local btn = createTabButton(name)
     tabButtons[name] = btn
 
     local content = Instance.new("Frame")
@@ -219,15 +133,12 @@ for i, name in ipairs(tabNames) do
     content.BorderSizePixel = 0
     content.Visible = (i == 1)
     content.Parent = rightPanel
-
     local contentCorners = Instance.new("UICorner")
     contentCorners.CornerRadius = UDim.new(0, 6)
     contentCorners.Parent = content
-
     rightContentFrames[name] = content
 end
 
--- Обработка кликов по вкладкам
 for name, btn in pairs(tabButtons) do
     btn.MouseButton1Click:Connect(function()
         for n, frame in pairs(rightContentFrames) do
@@ -247,14 +158,10 @@ for name, btn in pairs(tabButtons) do
     end)
 end
 
--- Выделяем первую вкладку (Games) по умолчанию
 tabButtons["Games"].BackgroundColor3 = Color3.fromRGB(60, 60, 70)
 tabButtons["Games"].BackgroundTransparency = 0.1
 tabButtons["Games"].TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- ============================================================
---  FOOTER
--- ============================================================
 local footer = Instance.new("Frame")
 footer.Size = UDim2.new(1, 0, 0, 35)
 footer.Position = UDim2.new(0, 0, 1, -35)
@@ -289,4 +196,24 @@ footerText.TextXAlignment = Enum.TextXAlignment.Center
 footerText.TextYAlignment = Enum.TextYAlignment.Center
 footerText.Parent = footer
 
-print("✅ AQWARIUM SCRIPT загружен! Вкладки: Games, Players, Misc, Combat")
+-- ============================================================
+--  СКРЫВАЕМ ИГРОВОЙ ТАЙМЕР ("секунд")
+-- ============================================================
+local function hideGameTimer()
+    for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui:GetDescendants()) do
+        if v:IsA("TextLabel") and string.find(v.Text, "секунд") then
+            v.Visible = false
+            v.Text = ""
+        end
+    end
+end
+
+hideGameTimer()
+game:GetService("Players").LocalPlayer.PlayerGui.DescendantAdded:Connect(function(child)
+    if child:IsA("TextLabel") and string.find(child.Text, "секунд") then
+        child.Visible = false
+        child.Text = ""
+    end
+end)
+
+print("✅ AQWARIUM SCRIPT (скрыт таймер) загружен!")
