@@ -1,5 +1,5 @@
 -- =====================================================
---  AW-SCRIPT (Teleport к финишу в Ink Game)
+--  AW-SCRIPT (Универсальный телепорт к финишу)
 --  Вкладка Game: кнопка Teleport to finish
 -- =====================================================
 
@@ -77,7 +77,7 @@ stroke.Thickness = 1.5
 stroke.Parent = mainFrame
 
 -- ============================================================
---  HEADER (без изменений)
+--  HEADER
 -- ============================================================
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
@@ -125,7 +125,7 @@ headerLine.BorderSizePixel = 0
 headerLine.Parent = mainFrame
 
 -- ============================================================
---  ПАНЕЛИ (без изменений)
+--  ПАНЕЛИ
 -- ============================================================
 local leftPanel = Instance.new("Frame")
 leftPanel.Size = UDim2.new(0.2, 0, 1, -40)
@@ -157,7 +157,7 @@ rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
 
 -- ============================================================
---  ФУНКЦИЯ ТЕЛЕПОРТА К ФИНИШУ (без куклы)
+--  УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ТЕЛЕПОРТА
 -- ============================================================
 local function teleportToFinish()
     local character = player.Character
@@ -171,34 +171,66 @@ local function teleportToFinish()
         return
     end
 
-    -- Ищем объект финиша (Finish, End, FinishLine)
-    local finishPart = nil
+    -- 1. Ищем финиш (любое название: finish, end, exit, safe, line, doll)
+    local finishTarget = nil
     for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and (string.lower(obj.Name):find("finish") or string.lower(obj.Name):find("end") or string.lower(obj.Name):find("line")) then
-            finishPart = obj
-            break
+        if obj:IsA("BasePart") or obj:IsA("Model") then
+            local name = obj.Name:lower()
+            if name:find("finish") or name:find("end") or name:find("exit") or name:find("safe") or name:find("line") or name:find("doll") then
+                finishTarget = obj
+                break
+            end
         end
     end
 
-    if not finishPart then
-        print("❌ Финиш не найден на карте. Возможно, игра ещё не началась.")
+    if not finishTarget then
+        print("❌ Финиш не найден")
         return
     end
 
-    -- Рассчитываем позицию: встаём за финишной линией (на 5 стёбов вперёд)
-    -- Для этого находим направление от центра карты к финишу или просто используем направление вверх? 
-    -- Проще: добавим к позиции финиша смещение по оси Z (обычно финиш расположен по оси Z, но может быть иначе).
-    -- Чтобы быть универсальным, используем вектор направления от игрока к финишу, чтобы встать за финиш (дальше от игрока)
+    -- 2. Определяем позицию финиша
+    local finishPos
+    if finishTarget:IsA("BasePart") then
+        finishPos = finishTarget.Position
+    elseif finishTarget:IsA("Model") then
+        local primary = finishTarget.PrimaryPart or finishTarget:FindFirstChild("HumanoidRootPart") or finishTarget:FindFirstChild("Head")
+        if primary then
+            finishPos = primary.Position
+        else
+            local cf, size = finishTarget:GetBoundingBox()
+            finishPos = cf.Position
+        end
+    end
+
+    if not finishPos then
+        print("❌ Не удалось определить позицию финиша")
+        return
+    end
+
+    -- 3. Направление от игрока к финишу
     local playerPos = hrp.Position
-    local finishPos = finishPart.Position
-    local dir = (finishPos - playerPos).Unit  -- направление от игрока к финишу
-    local targetPos = finishPos + dir * 5      -- смещаем на 5 стёбов за финиш
+    local dir = (finishPos - playerPos).Unit
 
-    -- Добавляем небольшое смещение по Y, чтобы не провалиться
-    targetPos = Vector3.new(targetPos.X, targetPos.Y + 3, targetPos.Z)
+    -- 4. Ставим за финиш на 8 стёбов дальше
+    local targetPos = finishPos + dir * 8
 
+    -- 5. Raycast вниз, чтобы найти землю
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+    rayParams.FilterDescendantsInstances = {character}
+    local rayOrigin = targetPos + Vector3.new(0, 10, 0)
+    local rayDirection = Vector3.new(0, -20, 0)
+    local rayResult = workspace:Raycast(rayOrigin, rayDirection, rayParams)
+
+    if rayResult then
+        targetPos = rayResult.Position + Vector3.new(0, 3, 0)
+    else
+        targetPos = targetPos + Vector3.new(0, 5, 0)
+    end
+
+    -- 6. Телепорт
     hrp.CFrame = CFrame.new(targetPos)
-    print("✅ Телепорт к финишу выполнен! Позиция: " .. tostring(targetPos))
+    print("✅ Телепорт выполнен! Позиция: " .. tostring(targetPos))
 end
 
 -- ============================================================
@@ -298,7 +330,6 @@ for i, name in ipairs(tabNames) do
         bc.CornerRadius = UDim.new(0, 8)
         bc.Parent = block
 
-        -- Заголовок
         local blockTitle = Instance.new("TextLabel")
         blockTitle.Size = UDim2.new(1, 0, 0, 25)
         blockTitle.Position = UDim2.new(0, 0, 0, 0)
@@ -311,7 +342,6 @@ for i, name in ipairs(tabNames) do
         blockTitle.TextYAlignment = Enum.TextYAlignment.Center
         blockTitle.Parent = block
 
-        -- Серая полоска
         local separator = Instance.new("Frame")
         separator.Size = UDim2.new(0.9, 0, 0, 1)
         separator.Position = UDim2.new(0.05, 0, 0, 25)
@@ -372,7 +402,7 @@ end
 animateTabButton(tabButtons["Game"], true)
 
 -- ============================================================
---  ФУТЕР (без изменений)
+--  ФУТЕР
 -- ============================================================
 local footer = Instance.new("Frame")
 footer.Size = UDim2.new(1, 0, 0, 35)
@@ -422,7 +452,7 @@ footerText.TextYAlignment = Enum.TextYAlignment.Center
 footerText.Parent = footer
 
 -- ============================================================
---  СКРЫВАЕМ "секунд" (без изменений)
+--  СКРЫВАЕМ "секунд"
 -- ============================================================
 local function hideSeconds()
     for _, v in pairs(player.PlayerGui:GetDescendants()) do
@@ -440,4 +470,4 @@ player.PlayerGui.DescendantAdded:Connect(function(child)
     end
 end)
 
-print("✅ AW-SCRIPT (Teleport к финишу) загружен!")
+print("✅ AW-SCRIPT (универсальный телепорт) загружен!")
