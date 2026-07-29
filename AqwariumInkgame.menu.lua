@@ -1,6 +1,6 @@
 -- =====================================================
---  AW-SCRIPT (Teleport к кукле в Ink Game)
---  Вкладка Game: кнопка Teleport
+--  AW-SCRIPT (Teleport к финишу в Ink Game)
+--  Вкладка Game: кнопка Teleport to finish
 -- =====================================================
 
 repeat wait() until game:IsLoaded()
@@ -12,7 +12,7 @@ if not player then warn("Игрок не найден") return end
 local TweenService = game:GetService("TweenService")
 
 -- ============================================================
---  ЗАГРУЗКА ЛОГОТИПА
+--  ЗАГРУЗКА ЛОГОТИПА (без изменений)
 -- ============================================================
 local imageUrl = "https://i.ibb.co/MkhPVnWs/Chat-GPT-Image-28-2026-14-13-59.png"
 local fileName = "menu_logo.png"
@@ -77,7 +77,7 @@ stroke.Thickness = 1.5
 stroke.Parent = mainFrame
 
 -- ============================================================
---  HEADER
+--  HEADER (без изменений)
 -- ============================================================
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
@@ -125,7 +125,7 @@ headerLine.BorderSizePixel = 0
 headerLine.Parent = mainFrame
 
 -- ============================================================
---  ПАНЕЛИ
+--  ПАНЕЛИ (без изменений)
 -- ============================================================
 local leftPanel = Instance.new("Frame")
 leftPanel.Size = UDim2.new(0.2, 0, 1, -40)
@@ -157,9 +157,9 @@ rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
 
 -- ============================================================
---  ФУНКЦИЯ ТЕЛЕПОРТА К КУКЛЕ
+--  ФУНКЦИЯ ТЕЛЕПОРТА К ФИНИШУ (без куклы)
 -- ============================================================
-local function teleportToDoll()
+local function teleportToFinish()
     local character = player.Character
     if not character then
         print("❌ Персонаж не найден")
@@ -171,48 +171,38 @@ local function teleportToDoll()
         return
     end
 
-    -- Ищем модель куклы (Doll / SquidDoll) в workspace
-    local doll = nil
+    -- Ищем объект финиша (Finish, End, FinishLine)
+    local finishPart = nil
     for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") and string.lower(obj.Name):find("doll") then
-            doll = obj
+        if obj:IsA("BasePart") and (string.lower(obj.Name):find("finish") or string.lower(obj.Name):find("end") or string.lower(obj.Name):find("line")) then
+            finishPart = obj
             break
         end
     end
 
-    if not doll then
-        print("❌ Кукла не найдена на карте. Возможно, игра ещё не началась.")
+    if not finishPart then
+        print("❌ Финиш не найден на карте. Возможно, игра ещё не началась.")
         return
     end
 
-    -- Определяем основную часть куклы
-    local targetPart = doll.PrimaryPart
-    if not targetPart then
-        targetPart = doll:FindFirstChild("HumanoidRootPart") or doll:FindFirstChild("Head") or doll:FindFirstChild("Torso")
-    end
-    if not targetPart then
-        print("❌ Не найдена основная часть куклы")
-        return
-    end
-
-    local dollPos = targetPart.Position
+    -- Рассчитываем позицию: встаём за финишной линией (на 5 стёбов вперёд)
+    -- Для этого находим направление от центра карты к финишу или просто используем направление вверх? 
+    -- Проще: добавим к позиции финиша смещение по оси Z (обычно финиш расположен по оси Z, но может быть иначе).
+    -- Чтобы быть универсальным, используем вектор направления от игрока к финишу, чтобы встать за финиш (дальше от игрока)
     local playerPos = hrp.Position
-
-    -- Направление от игрока к кукле (чтобы встать за куклой, то есть дальше по направлению)
-    local dir = (dollPos - playerPos).Unit
-    -- Если игрок уже за куклой (направление отрицательное), всё равно используем направление от игрока к кукле,
-    -- чтобы оказаться за куклой со стороны финиша.
-    local teleportPos = dollPos + dir * 6  -- смещаем на 6 стёбов за куклу
+    local finishPos = finishPart.Position
+    local dir = (finishPos - playerPos).Unit  -- направление от игрока к финишу
+    local targetPos = finishPos + dir * 5      -- смещаем на 5 стёбов за финиш
 
     -- Добавляем небольшое смещение по Y, чтобы не провалиться
-    teleportPos = Vector3.new(teleportPos.X, dollPos.Y + 3, teleportPos.Z)
+    targetPos = Vector3.new(targetPos.X, targetPos.Y + 3, targetPos.Z)
 
-    hrp.CFrame = CFrame.new(teleportPos)
-    print("✅ Телепорт к кукле выполнен! Позиция: " .. tostring(teleportPos))
+    hrp.CFrame = CFrame.new(targetPos)
+    print("✅ Телепорт к финишу выполнен! Позиция: " .. tostring(targetPos))
 end
 
 -- ============================================================
---  ВКЛАДКИ
+--  ВКЛАДКИ (анимации без изменений)
 -- ============================================================
 local tabNames = {"Game", "Рlayer","Combat", "Misc"}
 local tabButtons = {}
@@ -347,7 +337,7 @@ for i, name in ipairs(tabNames) do
         tbc.Parent = teleportBtn
 
         teleportBtn.MouseButton1Click:Connect(function()
-            teleportToDoll()
+            teleportToFinish()
         end)
 
         rightContentFrames[name] = content
@@ -382,7 +372,7 @@ end
 animateTabButton(tabButtons["Game"], true)
 
 -- ============================================================
---  ФУТЕР
+--  ФУТЕР (без изменений)
 -- ============================================================
 local footer = Instance.new("Frame")
 footer.Size = UDim2.new(1, 0, 0, 35)
@@ -432,7 +422,7 @@ footerText.TextYAlignment = Enum.TextYAlignment.Center
 footerText.Parent = footer
 
 -- ============================================================
---  СКРЫВАЕМ "секунд"
+--  СКРЫВАЕМ "секунд" (без изменений)
 -- ============================================================
 local function hideSeconds()
     for _, v in pairs(player.PlayerGui:GetDescendants()) do
@@ -450,4 +440,4 @@ player.PlayerGui.DescendantAdded:Connect(function(child)
     end
 end)
 
-print("✅ AW-SCRIPT (Teleport к кукле) загружен!")
+print("✅ AW-SCRIPT (Teleport к финишу) загружен!")
