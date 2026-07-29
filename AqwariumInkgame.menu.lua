@@ -1,6 +1,6 @@
 -- =====================================================
---  AW-SCRIPT (только Teleport в блоке Game)
---  Компактный блок с одним переключателем
+--  AW-SCRIPT (Teleport к кукле в Ink Game)
+--  Вкладка Game: кнопка Teleport
 -- =====================================================
 
 repeat wait() until game:IsLoaded()
@@ -76,7 +76,9 @@ stroke.Transparency = 0.5
 stroke.Thickness = 1.5
 stroke.Parent = mainFrame
 
--- HEADER
+-- ============================================================
+--  HEADER
+-- ============================================================
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
 header.Position = UDim2.new(0, 0, 0, 0)
@@ -122,7 +124,9 @@ headerLine.BackgroundTransparency = 0.4
 headerLine.BorderSizePixel = 0
 headerLine.Parent = mainFrame
 
--- ПАНЕЛИ
+-- ============================================================
+--  ПАНЕЛИ
+-- ============================================================
 local leftPanel = Instance.new("Frame")
 leftPanel.Size = UDim2.new(0.2, 0, 1, -40)
 leftPanel.Position = UDim2.new(0, 0, 0, 40)
@@ -151,6 +155,61 @@ rightPanel.Parent = mainFrame
 local rightCorners = Instance.new("UICorner")
 rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
+
+-- ============================================================
+--  ФУНКЦИЯ ТЕЛЕПОРТА К КУКЛЕ
+-- ============================================================
+local function teleportToDoll()
+    local character = player.Character
+    if not character then
+        print("❌ Персонаж не найден")
+        return
+    end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then
+        print("❌ HumanoidRootPart не найден")
+        return
+    end
+
+    -- Ищем модель куклы (Doll / SquidDoll) в workspace
+    local doll = nil
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and string.lower(obj.Name):find("doll") then
+            doll = obj
+            break
+        end
+    end
+
+    if not doll then
+        print("❌ Кукла не найдена на карте. Возможно, игра ещё не началась.")
+        return
+    end
+
+    -- Определяем основную часть куклы
+    local targetPart = doll.PrimaryPart
+    if not targetPart then
+        targetPart = doll:FindFirstChild("HumanoidRootPart") or doll:FindFirstChild("Head") or doll:FindFirstChild("Torso")
+    end
+    if not targetPart then
+        print("❌ Не найдена основная часть куклы")
+        return
+    end
+
+    local dollPos = targetPart.Position
+    local playerPos = hrp.Position
+
+    -- Направление от игрока к кукле (чтобы встать за куклой, то есть дальше по направлению)
+    local dir = (dollPos - playerPos).Unit
+    -- Если игрок уже за куклой (направление отрицательное), всё равно используем направление от игрока к кукле,
+    -- чтобы оказаться за куклой со стороны финиша.
+    local teleportPos = dollPos + dir * 6  -- смещаем на 6 стёбов за куклу
+
+    -- Добавляем небольшое смещение по Y, чтобы не провалиться
+    teleportPos = Vector3.new(teleportPos.X, dollPos.Y + 3, teleportPos.Z)
+
+    hrp.CFrame = CFrame.new(teleportPos)
+    print("✅ Телепорт к кукле выполнен! Позиция: " .. tostring(teleportPos))
+end
 
 -- ============================================================
 --  ВКЛАДКИ
@@ -232,14 +291,14 @@ for i, name in ipairs(tabNames) do
         content.Parent = rightPanel
         content.ScrollBarThickness = 4
         content.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60)
-        content.CanvasSize = UDim2.new(0, 0, 0, 120) -- уменьшил, т.к. только одна строка
+        content.CanvasSize = UDim2.new(0, 0, 0, 120)
         local sc = Instance.new("UICorner")
         sc.CornerRadius = UDim.new(0, 6)
         sc.Parent = content
 
-        -- Блок
+        -- Блок Red Light, Green Light
         local block = Instance.new("Frame")
-        block.Size = UDim2.new(0.9, 0, 0, 90) -- высота уменьшена
+        block.Size = UDim2.new(0.9, 0, 0, 100)
         block.Position = UDim2.new(0.05, 0, 0, 10)
         block.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
         block.BackgroundTransparency = 0.1
@@ -271,85 +330,24 @@ for i, name in ipairs(tabNames) do
         separator.BorderSizePixel = 0
         separator.Parent = block
 
-        -- Функция создания переключателя
-        local function createToggle(parent, text, y, defaultState, callback)
-            local row = Instance.new("Frame")
-            row.Size = UDim2.new(1, -20, 0, 30)
-            row.Position = UDim2.new(0, 10, 0, y)
-            row.BackgroundTransparency = 1
-            row.Parent = parent
+        -- Кнопка Teleport
+        local teleportBtn = Instance.new("TextButton")
+        teleportBtn.Size = UDim2.new(0.8, 0, 0, 40)
+        teleportBtn.Position = UDim2.new(0.1, 0, 0.35, 0)
+        teleportBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+        teleportBtn.BackgroundTransparency = 0.3
+        teleportBtn.BorderSizePixel = 0
+        teleportBtn.Text = "Teleport to finish"
+        teleportBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        teleportBtn.TextSize = 16
+        teleportBtn.Font = Enum.Font.GothamBold
+        teleportBtn.Parent = block
+        local tbc = Instance.new("UICorner")
+        tbc.CornerRadius = UDim.new(0, 8)
+        tbc.Parent = teleportBtn
 
-            local label = Instance.new("TextLabel")
-            label.Size = UDim2.new(0.7, 0, 1, 0)
-            label.Position = UDim2.new(0, 0, 0, 0)
-            label.BackgroundTransparency = 1
-            label.Text = text
-            label.TextColor3 = Color3.fromRGB(200, 200, 200)
-            label.TextSize = 13
-            label.Font = Enum.Font.GothamMedium
-            label.TextXAlignment = Enum.TextXAlignment.Left
-            label.TextYAlignment = Enum.TextYAlignment.Center
-            label.Parent = row
-
-            local checkbox = Instance.new("TextButton")
-            checkbox.Size = UDim2.new(0, 20, 0, 20)
-            checkbox.Position = UDim2.new(0.85, 0, 0.5, -10)
-            checkbox.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-            checkbox.BackgroundTransparency = 0.2
-            checkbox.BorderSizePixel = 0
-            checkbox.Text = ""
-            checkbox.Parent = row
-            local cbCorner = Instance.new("UICorner")
-            cbCorner.CornerRadius = UDim.new(0, 4)
-            cbCorner.Parent = checkbox
-
-            local state = defaultState
-            local checkMark = Instance.new("TextLabel")
-            checkMark.Size = UDim2.new(1, 0, 1, 0)
-            checkMark.BackgroundTransparency = 1
-            checkMark.Text = state and "✔" or ""
-            checkMark.TextColor3 = Color3.fromRGB(255, 255, 255)
-            checkMark.TextSize = 14
-            checkMark.Font = Enum.Font.GothamBold
-            checkMark.TextXAlignment = Enum.TextXAlignment.Center
-            checkMark.TextYAlignment = Enum.TextYAlignment.Center
-            checkMark.Parent = checkbox
-
-            checkbox.MouseButton1Click:Connect(function()
-                state = not state
-                checkMark.Text = state and "✔" or ""
-                if callback then callback(state) end
-            end)
-
-            return checkbox
-        end
-
-        -- Только один переключатель Teleport
-        createToggle(block, "Teleport to finish", 35, false, function(val)
-            if val then
-                local character = player.Character
-                if not character then return end
-                local hrp = character:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-
-                local finishPart = nil
-                for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj:IsA("BasePart") and (obj.Name:lower():find("finish") or obj.Name:lower():find("end")) then
-                        finishPart = obj
-                        break
-                    end
-                end
-
-                if finishPart then
-                    hrp.CFrame = CFrame.new(finishPart.Position + Vector3.new(0, 3, 0))
-                    print("✅ Телепорт выполнен!")
-                else
-                    print("❌ Объект 'Finish' не найден, телепорт в центр")
-                    hrp.CFrame = CFrame.new(0, 5, 0)
-                end
-            else
-                print("Teleport отключён")
-            end
+        teleportBtn.MouseButton1Click:Connect(function()
+            teleportToDoll()
         end)
 
         rightContentFrames[name] = content
@@ -452,4 +450,4 @@ player.PlayerGui.DescendantAdded:Connect(function(child)
     end
 end)
 
-print("✅ AW-SCRIPT (только Teleport) загружен!")
+print("✅ AW-SCRIPT (Teleport к кукле) загружен!")
