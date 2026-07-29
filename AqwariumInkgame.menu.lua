@@ -1,5 +1,5 @@
 -- =====================================================
---  AQWARIUM SCRIPT (с вкладками Game, Player, Misc, Combat)
+--  AW-SCRIPT (с вкладками Game, Player, Misc, Combat)
 --  Логотип + надпись, серая обводка
 --  Скрывает "секунд", не трогает GUI игры
 -- =====================================================
@@ -120,15 +120,15 @@ else
     print("❌ Логотип не загружен")
 end
 
--- Надпись
+-- Надпись (изменено название и убран жирный шрифт)
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(0, 220, 1, 0)
 title.Position = UDim2.new(0, 48, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "AQWARIUM SCRIPT"
+title.Text = "AW-SCRIPT"                        -- новое название
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 22
-title.Font = Enum.Font.GothamBold
+title.Font = Enum.Font.GothamMedium             -- убран жирный (был GothamBold)
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextYAlignment = Enum.TextYAlignment.Center
 title.Parent = header
@@ -175,9 +175,9 @@ rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
 
 -- ============================================================
---  ВКЛАДКИ (Game, Players, Misc, Combat)
+--  ВКЛАДКИ (Game, Рlayer, Combat, Misc) — без изменений
 -- ============================================================
-local tabNames = {"Game", "Рlayer","Combat", "Misc"}   -- изменено
+local tabNames = {"Game", "Рlayer","Combat", "Misc"}   -- как у тебя
 local tabButtons = {}
 local rightContentFrames = {}
 
@@ -282,4 +282,5 @@ footerText.Font = Enum.Font.GothamMedium
 footerText.TextXAlignment = Enum.TextXAlignment.Center
 footerText.TextYAlignment = Enum.TextYAlignment.Center
 footerText.Parent = footer
-print("✅ AQWARIUM SCRIPT (вкладки Game, Player, Misc, Combat) загружен!")
+
+print("✅ AW-SCRIPT (вкладки Game, Player, Misc, Combat) загружен!")
