@@ -1,19 +1,17 @@
 -- =====================================================
---  AW-SCRIPT (с вкладками Game, Player, Misc, Combat)
---  Логотип + надпись, серая обводка
+--  AW-SCRIPT (с анимацией вкладок)
+--  Логотип + надпись, серая обводка, v1.5 в футере
 --  Скрывает "секунд", не трогает GUI игры
---  Версия v1.5 в футере слева
 -- =====================================================
 
--- Ждём загрузки
 repeat wait() until game:IsLoaded()
 wait(0.5)
 
 local player = game:GetService("Players").LocalPlayer
-if not player then
-    warn("Игрок не найден")
-    return
-end
+if not player then warn("Игрок не найден") return end
+
+-- TweenService
+local TweenService = game:GetService("TweenService")
 
 -- ============================================================
 --  ЗАГРУЗКА ЛОГОТИПА
@@ -23,21 +21,15 @@ local fileName = "menu_logo.png"
 local filePath = fileName
 
 local function fileExists(path)
-    local success, result = pcall(function()
-        return loadfile(path)
-    end)
+    local success, result = pcall(function() return loadfile(path) end)
     return success and result ~= nil
 end
 
 if not fileExists(filePath) then
     print("📥 Скачиваем логотип...")
-    local success, content = pcall(function()
-        return game:HttpGet(imageUrl, true)
-    end)
+    local success, content = pcall(function() return game:HttpGet(imageUrl, true) end)
     if success and content then
-        local writeSuccess, err = pcall(function()
-            writefile(filePath, content)
-        end)
+        local writeSuccess, err = pcall(function() writefile(filePath, content) end)
         if writeSuccess then
             print("✅ Логотип сохранён: " .. filePath)
         else
@@ -101,27 +93,22 @@ local headerCorners = Instance.new("UICorner")
 headerCorners.CornerRadius = UDim.new(0, 12)
 headerCorners.Parent = header
 
--- Логотип
 if logoPath then
     local logo = Instance.new("ImageLabel")
-    logo.Name = "MenuLogoIcon"
     logo.Size = UDim2.new(0, 32, 0, 32)
     logo.Position = UDim2.new(0, 8, 0, 4)
     logo.BackgroundTransparency = 1
-    logo.BorderSizePixel = 0
     logo.Image = logoPath
     logo.ZIndex = 15
     logo.Parent = header
-
-    local logoCorner = Instance.new("UICorner")
-    logoCorner.CornerRadius = UDim.new(0, 8)
-    logoCorner.Parent = logo
+    local lc = Instance.new("UICorner")
+    lc.CornerRadius = UDim.new(0, 8)
+    lc.Parent = logo
     print("🖼️ Логотип загружен")
 else
     print("❌ Логотип не загружен")
 end
 
--- Надпись (изменено название и убран жирный шрифт)
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(0, 220, 1, 0)
 title.Position = UDim2.new(0, 48, 0, 0)
@@ -134,7 +121,6 @@ title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextYAlignment = Enum.TextYAlignment.Center
 title.Parent = header
 
--- Серая линия
 local headerLine = Instance.new("Frame")
 headerLine.Size = UDim2.new(1, 0, 0, 1)
 headerLine.Position = UDim2.new(0, 0, 0, 39)
@@ -182,6 +168,40 @@ local tabNames = {"Game", "Рlayer","Combat", "Misc"}
 local tabButtons = {}
 local rightContentFrames = {}
 
+-- Функция анимации кнопки (плавное изменение размера, цвета, прозрачности)
+local function animateTabButton(btn, isActive)
+    local targetSize = isActive and UDim2.new(0.9, 0, 0, 34) or UDim2.new(0.85, 0, 0, 30)
+    local targetColor = isActive and Color3.fromRGB(60, 60, 70) or Color3.fromRGB(28, 28, 28)
+    local targetTrans = isActive and 0.1 or 0.5
+    local targetTextColor = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(200, 200, 200)
+
+    local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    TweenService:Create(btn, tweenInfo, {Size = targetSize}):Play()
+    TweenService:Create(btn, tweenInfo, {BackgroundColor3 = targetColor}):Play()
+    TweenService:Create(btn, tweenInfo, {BackgroundTransparency = targetTrans}):Play()
+    TweenService:Create(btn, tweenInfo, {TextColor3 = targetTextColor}):Play()
+end
+
+-- Функция анимации появления контента (затухание + сдвиг)
+local function animateContent(content, show)
+    if show then
+        content.Visible = true
+        content.Position = UDim2.new(0, 5, 0, 10) -- небольшой сдвиг вниз
+        content.BackgroundTransparency = 0.5
+        TweenService:Create(content, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position = UDim2.new(0, 5, 0, 5),
+            BackgroundTransparency = 0.2
+        }):Play()
+    else
+        TweenService:Create(content, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Position = UDim2.new(0, 5, 0, 10),
+            BackgroundTransparency = 0.6
+        }):Play()
+        task.wait(0.2)
+        content.Visible = false
+    end
+end
+
 for i, name in ipairs(tabNames) do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.85, 0, 0, 30)
@@ -196,18 +216,19 @@ for i, name in ipairs(tabNames) do
     local btnCorners = Instance.new("UICorner")
     btnCorners.CornerRadius = UDim.new(0, 6)
     btnCorners.Parent = btn
+
+    -- Наведение
     btn.MouseEnter:Connect(function()
-        if btn.BackgroundTransparency > 0.1 then
-            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-            btn.BackgroundTransparency = 0.2
+        if btn.BackgroundTransparency > 0.2 then
+            TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(45, 45, 50), BackgroundTransparency = 0.2}):Play()
         end
     end)
     btn.MouseLeave:Connect(function()
-        if btn.BackgroundTransparency < 0.9 then
-            btn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-            btn.BackgroundTransparency = 0.5
+        if btn.BackgroundTransparency > 0.2 then
+            TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(28, 28, 28), BackgroundTransparency = 0.5}):Play()
         end
     end)
+
     tabButtons[name] = btn
 
     local content = Instance.new("Frame")
@@ -224,31 +245,26 @@ for i, name in ipairs(tabNames) do
     rightContentFrames[name] = content
 end
 
+-- Обработчик кликов с анимацией
 for name, btn in pairs(tabButtons) do
     btn.MouseButton1Click:Connect(function()
-        for n, frame in pairs(rightContentFrames) do
-            frame.Visible = (n == name)
-        end
+        -- Анимация всех кнопок
         for n, b in pairs(tabButtons) do
-            if n == name then
-                b.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
-                b.BackgroundTransparency = 0.1
-                b.TextColor3 = Color3.fromRGB(255, 255, 255)
-            else
-                b.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-                b.BackgroundTransparency = 0.5
-                b.TextColor3 = Color3.fromRGB(200, 200, 200)
-            end
+            animateTabButton(b, n == name)
+        end
+
+        -- Анимация контента
+        for n, frame in pairs(rightContentFrames) do
+            animateContent(frame, n == name)
         end
     end)
 end
 
-tabButtons["Game"].BackgroundColor3 = Color3.fromRGB(60, 60, 70)
-tabButtons["Game"].BackgroundTransparency = 0.1
-tabButtons["Game"].TextColor3 = Color3.fromRGB(255, 255, 255)
+-- Устанавливаем начальное состояние (первая вкладка активна)
+animateTabButton(tabButtons["Game"], true)
 
 -- ============================================================
---  ФУТЕР (с v1.5 слева)
+--  ФУТЕР
 -- ============================================================
 local footer = Instance.new("Frame")
 footer.Size = UDim2.new(1, 0, 0, 35)
@@ -256,7 +272,6 @@ footer.Position = UDim2.new(0, 0, 1, -35)
 footer.BackgroundTransparency = 1
 footer.Parent = mainFrame
 
--- Верхняя линия
 local lineUp = Instance.new("Frame")
 lineUp.Size = UDim2.new(1, 0, 0, 1)
 lineUp.Position = UDim2.new(0, 0, 0, 2)
@@ -265,7 +280,6 @@ lineUp.BackgroundTransparency = 0.4
 lineUp.BorderSizePixel = 0
 lineUp.Parent = footer
 
--- Нижняя линия
 local lineDown = Instance.new("Frame")
 lineDown.Size = UDim2.new(1, 0, 0, 1)
 lineDown.Position = UDim2.new(0, 0, 1, -3)
@@ -274,21 +288,19 @@ lineDown.BackgroundTransparency = 0.4
 lineDown.BorderSizePixel = 0
 lineDown.Parent = footer
 
--- Текст версии слева (v1.5)
 local versionText = Instance.new("TextLabel")
 versionText.Size = UDim2.new(0.2, 0, 1, 0)
 versionText.Position = UDim2.new(0.02, 0, 0, 0)
 versionText.BackgroundTransparency = 1
 versionText.Text = "v1.5"
-versionText.TextColor3 = Color3.fromRGB(180, 180, 180)   -- светло-серый
-versionText.TextTransparency = 0.4                      -- полупрозрачный
+versionText.TextColor3 = Color3.fromRGB(180, 180, 180)
+versionText.TextTransparency = 0.4
 versionText.TextSize = 13
 versionText.Font = Enum.Font.GothamMedium
 versionText.TextXAlignment = Enum.TextXAlignment.Left
 versionText.TextYAlignment = Enum.TextYAlignment.Center
 versionText.Parent = footer
 
--- Центральный текст (script By | tormentor412)
 local footerText = Instance.new("TextLabel")
 footerText.Size = UDim2.new(1, 0, 1, 0)
 footerText.Position = UDim2.new(0, 0, 0, 0)
@@ -301,4 +313,23 @@ footerText.TextXAlignment = Enum.TextXAlignment.Center
 footerText.TextYAlignment = Enum.TextYAlignment.Center
 footerText.Parent = footer
 
-print("✅ AW-SCRIPT (v1.5) загружен!")
+-- ============================================================
+--  СКРЫВАЕМ "секунд"
+-- ============================================================
+local function hideSeconds()
+    for _, v in pairs(player.PlayerGui:GetDescendants()) do
+        if v:IsA("TextLabel") and (v.Text:lower():find("секунд") or v.Text:lower():find("игрок") or v.Text:lower():find("game")) then
+            v.Visible = false
+            v.Text = ""
+        end
+    end
+end
+hideSeconds()
+player.PlayerGui.DescendantAdded:Connect(function(child)
+    if child:IsA("TextLabel") and (child.Text:lower():find("секунд") or child.Text:lower():find("игрок") or child.Text:lower():find("game")) then
+        child.Visible = false
+        child.Text = ""
+    end
+end)
+
+print("✅ AW-SCRIPT с анимацией вкладок загружен!")
