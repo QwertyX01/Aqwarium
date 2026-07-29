@@ -2,6 +2,7 @@
 --  AW-SCRIPT (с вкладками Game, Player, Misc, Combat)
 --  Логотип + надпись, серая обводка
 --  Скрывает "секунд", не трогает GUI игры
+--  Версия v1.5 в футере слева
 -- =====================================================
 
 -- Ждём загрузки
@@ -125,10 +126,10 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(0, 220, 1, 0)
 title.Position = UDim2.new(0, 48, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "AW-SCRIPT"                        -- новое название
+title.Text = "AW-SCRIPT"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 22
-title.Font = Enum.Font.GothamMedium             -- убран жирный (был GothamBold)
+title.Font = Enum.Font.GothamMedium
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextYAlignment = Enum.TextYAlignment.Center
 title.Parent = header
@@ -175,9 +176,9 @@ rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
 
 -- ============================================================
---  ВКЛАДКИ (Game, Рlayer, Combat, Misc) — без изменений
+--  ВКЛАДКИ (Game, Рlayer, Combat, Misc)
 -- ============================================================
-local tabNames = {"Game", "Рlayer","Combat", "Misc"}   -- как у тебя
+local tabNames = {"Game", "Рlayer","Combat", "Misc"}
 local tabButtons = {}
 local rightContentFrames = {}
 
@@ -247,7 +248,7 @@ tabButtons["Game"].BackgroundTransparency = 0.1
 tabButtons["Game"].TextColor3 = Color3.fromRGB(255, 255, 255)
 
 -- ============================================================
---  ФУТЕР
+--  ФУТЕР (с v1.5 слева)
 -- ============================================================
 local footer = Instance.new("Frame")
 footer.Size = UDim2.new(1, 0, 0, 35)
@@ -255,6 +256,7 @@ footer.Position = UDim2.new(0, 0, 1, -35)
 footer.BackgroundTransparency = 1
 footer.Parent = mainFrame
 
+-- Верхняя линия
 local lineUp = Instance.new("Frame")
 lineUp.Size = UDim2.new(1, 0, 0, 1)
 lineUp.Position = UDim2.new(0, 0, 0, 2)
@@ -263,6 +265,7 @@ lineUp.BackgroundTransparency = 0.4
 lineUp.BorderSizePixel = 0
 lineUp.Parent = footer
 
+-- Нижняя линия
 local lineDown = Instance.new("Frame")
 lineDown.Size = UDim2.new(1, 0, 0, 1)
 lineDown.Position = UDim2.new(0, 0, 1, -3)
@@ -271,6 +274,21 @@ lineDown.BackgroundTransparency = 0.4
 lineDown.BorderSizePixel = 0
 lineDown.Parent = footer
 
+-- Текст версии слева (v1.5)
+local versionText = Instance.new("TextLabel")
+versionText.Size = UDim2.new(0.2, 0, 1, 0)
+versionText.Position = UDim2.new(0.02, 0, 0, 0)
+versionText.BackgroundTransparency = 1
+versionText.Text = "v1.5"
+versionText.TextColor3 = Color3.fromRGB(180, 180, 180)   -- светло-серый
+versionText.TextTransparency = 0.4                      -- полупрозрачный
+versionText.TextSize = 13
+versionText.Font = Enum.Font.GothamMedium
+versionText.TextXAlignment = Enum.TextXAlignment.Left
+versionText.TextYAlignment = Enum.TextYAlignment.Center
+versionText.Parent = footer
+
+-- Центральный текст (script By | tormentor412)
 local footerText = Instance.new("TextLabel")
 footerText.Size = UDim2.new(1, 0, 1, 0)
 footerText.Position = UDim2.new(0, 0, 0, 0)
@@ -283,4 +301,4 @@ footerText.TextXAlignment = Enum.TextXAlignment.Center
 footerText.TextYAlignment = Enum.TextYAlignment.Center
 footerText.Parent = footer
 
-print("✅ AW-SCRIPT (вкладки Game, Player, Misc, Combat) загружен!")
+print("✅ AW-SCRIPT (v1.5) загружен!")
