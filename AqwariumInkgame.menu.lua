@@ -1,7 +1,6 @@
 -- =====================================================
---  AW-SCRIPT (с анимацией вкладок)
---  Логотип + надпись, серая обводка, v1.5 в футере
---  Скрывает "секунд", не трогает GUI игры
+--  AW-SCRIPT (только Teleport в блоке Game)
+--  Компактный блок с одним переключателем
 -- =====================================================
 
 repeat wait() until game:IsLoaded()
@@ -10,7 +9,6 @@ wait(0.5)
 local player = game:GetService("Players").LocalPlayer
 if not player then warn("Игрок не найден") return end
 
--- TweenService
 local TweenService = game:GetService("TweenService")
 
 -- ============================================================
@@ -78,9 +76,7 @@ stroke.Transparency = 0.5
 stroke.Thickness = 1.5
 stroke.Parent = mainFrame
 
--- ============================================================
---  HEADER
--- ============================================================
+-- HEADER
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
 header.Position = UDim2.new(0, 0, 0, 0)
@@ -104,9 +100,6 @@ if logoPath then
     local lc = Instance.new("UICorner")
     lc.CornerRadius = UDim.new(0, 8)
     lc.Parent = logo
-    print("🖼️ Логотип загружен")
-else
-    print("❌ Логотип не загружен")
 end
 
 local title = Instance.new("TextLabel")
@@ -129,9 +122,7 @@ headerLine.BackgroundTransparency = 0.4
 headerLine.BorderSizePixel = 0
 headerLine.Parent = mainFrame
 
--- ============================================================
---  ПАНЕЛИ
--- ============================================================
+-- ПАНЕЛИ
 local leftPanel = Instance.new("Frame")
 leftPanel.Size = UDim2.new(0.2, 0, 1, -40)
 leftPanel.Position = UDim2.new(0, 0, 0, 40)
@@ -162,13 +153,12 @@ rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
 
 -- ============================================================
---  ВКЛАДКИ (Game, Рlayer, Combat, Misc)
+--  ВКЛАДКИ
 -- ============================================================
 local tabNames = {"Game", "Рlayer","Combat", "Misc"}
 local tabButtons = {}
 local rightContentFrames = {}
 
--- Функция анимации кнопки (плавное изменение размера, цвета, прозрачности)
 local function animateTabButton(btn, isActive)
     local targetSize = isActive and UDim2.new(0.9, 0, 0, 34) or UDim2.new(0.85, 0, 0, 30)
     local targetColor = isActive and Color3.fromRGB(60, 60, 70) or Color3.fromRGB(28, 28, 28)
@@ -182,11 +172,10 @@ local function animateTabButton(btn, isActive)
     TweenService:Create(btn, tweenInfo, {TextColor3 = targetTextColor}):Play()
 end
 
--- Функция анимации появления контента (затухание + сдвиг)
 local function animateContent(content, show)
     if show then
         content.Visible = true
-        content.Position = UDim2.new(0, 5, 0, 10) -- небольшой сдвиг вниз
+        content.Position = UDim2.new(0, 5, 0, 10)
         content.BackgroundTransparency = 0.5
         TweenService:Create(content, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
             Position = UDim2.new(0, 5, 0, 5),
@@ -217,7 +206,6 @@ for i, name in ipairs(tabNames) do
     btnCorners.CornerRadius = UDim.new(0, 6)
     btnCorners.Parent = btn
 
-    -- Наведение
     btn.MouseEnter:Connect(function()
         if btn.BackgroundTransparency > 0.2 then
             TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(45, 45, 50), BackgroundTransparency = 0.2}):Play()
@@ -231,36 +219,168 @@ for i, name in ipairs(tabNames) do
 
     tabButtons[name] = btn
 
-    local content = Instance.new("Frame")
-    content.Size = UDim2.new(1, -10, 1, -10)
-    content.Position = UDim2.new(0, 5, 0, 5)
-    content.BackgroundColor3 = Color3.fromRGB(25, 25, 28)
-    content.BackgroundTransparency = 0.2
-    content.BorderSizePixel = 0
-    content.Visible = (i == 1)
-    content.Parent = rightPanel
-    local contentCorners = Instance.new("UICorner")
-    contentCorners.CornerRadius = UDim.new(0, 6)
-    contentCorners.Parent = content
-    rightContentFrames[name] = content
+    local content
+
+    if name == "Game" then
+        content = Instance.new("ScrollingFrame")
+        content.Size = UDim2.new(1, -10, 1, -10)
+        content.Position = UDim2.new(0, 5, 0, 5)
+        content.BackgroundColor3 = Color3.fromRGB(25, 25, 28)
+        content.BackgroundTransparency = 0.2
+        content.BorderSizePixel = 0
+        content.Visible = (i == 1)
+        content.Parent = rightPanel
+        content.ScrollBarThickness = 4
+        content.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60)
+        content.CanvasSize = UDim2.new(0, 0, 0, 120) -- уменьшил, т.к. только одна строка
+        local sc = Instance.new("UICorner")
+        sc.CornerRadius = UDim.new(0, 6)
+        sc.Parent = content
+
+        -- Блок
+        local block = Instance.new("Frame")
+        block.Size = UDim2.new(0.9, 0, 0, 90) -- высота уменьшена
+        block.Position = UDim2.new(0.05, 0, 0, 10)
+        block.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+        block.BackgroundTransparency = 0.1
+        block.BorderSizePixel = 0
+        block.Parent = content
+        local bc = Instance.new("UICorner")
+        bc.CornerRadius = UDim.new(0, 8)
+        bc.Parent = block
+
+        -- Заголовок
+        local blockTitle = Instance.new("TextLabel")
+        blockTitle.Size = UDim2.new(1, 0, 0, 25)
+        blockTitle.Position = UDim2.new(0, 0, 0, 0)
+        blockTitle.BackgroundTransparency = 1
+        blockTitle.Text = "Red Light, Green Light"
+        blockTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+        blockTitle.TextSize = 14
+        blockTitle.Font = Enum.Font.GothamMedium
+        blockTitle.TextXAlignment = Enum.TextXAlignment.Center
+        blockTitle.TextYAlignment = Enum.TextYAlignment.Center
+        blockTitle.Parent = block
+
+        -- Серая полоска
+        local separator = Instance.new("Frame")
+        separator.Size = UDim2.new(0.9, 0, 0, 1)
+        separator.Position = UDim2.new(0.05, 0, 0, 25)
+        separator.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        separator.BackgroundTransparency = 0.4
+        separator.BorderSizePixel = 0
+        separator.Parent = block
+
+        -- Функция создания переключателя
+        local function createToggle(parent, text, y, defaultState, callback)
+            local row = Instance.new("Frame")
+            row.Size = UDim2.new(1, -20, 0, 30)
+            row.Position = UDim2.new(0, 10, 0, y)
+            row.BackgroundTransparency = 1
+            row.Parent = parent
+
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(0.7, 0, 1, 0)
+            label.Position = UDim2.new(0, 0, 0, 0)
+            label.BackgroundTransparency = 1
+            label.Text = text
+            label.TextColor3 = Color3.fromRGB(200, 200, 200)
+            label.TextSize = 13
+            label.Font = Enum.Font.GothamMedium
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.TextYAlignment = Enum.TextYAlignment.Center
+            label.Parent = row
+
+            local checkbox = Instance.new("TextButton")
+            checkbox.Size = UDim2.new(0, 20, 0, 20)
+            checkbox.Position = UDim2.new(0.85, 0, 0.5, -10)
+            checkbox.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+            checkbox.BackgroundTransparency = 0.2
+            checkbox.BorderSizePixel = 0
+            checkbox.Text = ""
+            checkbox.Parent = row
+            local cbCorner = Instance.new("UICorner")
+            cbCorner.CornerRadius = UDim.new(0, 4)
+            cbCorner.Parent = checkbox
+
+            local state = defaultState
+            local checkMark = Instance.new("TextLabel")
+            checkMark.Size = UDim2.new(1, 0, 1, 0)
+            checkMark.BackgroundTransparency = 1
+            checkMark.Text = state and "✔" or ""
+            checkMark.TextColor3 = Color3.fromRGB(255, 255, 255)
+            checkMark.TextSize = 14
+            checkMark.Font = Enum.Font.GothamBold
+            checkMark.TextXAlignment = Enum.TextXAlignment.Center
+            checkMark.TextYAlignment = Enum.TextYAlignment.Center
+            checkMark.Parent = checkbox
+
+            checkbox.MouseButton1Click:Connect(function()
+                state = not state
+                checkMark.Text = state and "✔" or ""
+                if callback then callback(state) end
+            end)
+
+            return checkbox
+        end
+
+        -- Только один переключатель Teleport
+        createToggle(block, "Teleport to finish", 35, false, function(val)
+            if val then
+                local character = player.Character
+                if not character then return end
+                local hrp = character:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                local finishPart = nil
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and (obj.Name:lower():find("finish") or obj.Name:lower():find("end")) then
+                        finishPart = obj
+                        break
+                    end
+                end
+
+                if finishPart then
+                    hrp.CFrame = CFrame.new(finishPart.Position + Vector3.new(0, 3, 0))
+                    print("✅ Телепорт выполнен!")
+                else
+                    print("❌ Объект 'Finish' не найден, телепорт в центр")
+                    hrp.CFrame = CFrame.new(0, 5, 0)
+                end
+            else
+                print("Teleport отключён")
+            end
+        end)
+
+        rightContentFrames[name] = content
+    else
+        content = Instance.new("Frame")
+        content.Size = UDim2.new(1, -10, 1, -10)
+        content.Position = UDim2.new(0, 5, 0, 5)
+        content.BackgroundColor3 = Color3.fromRGB(25, 25, 28)
+        content.BackgroundTransparency = 0.2
+        content.BorderSizePixel = 0
+        content.Visible = (i == 1)
+        content.Parent = rightPanel
+        local cc = Instance.new("UICorner")
+        cc.CornerRadius = UDim.new(0, 6)
+        cc.Parent = content
+        rightContentFrames[name] = content
+    end
 end
 
--- Обработчик кликов с анимацией
+-- Обработчики кликов для всех вкладок
 for name, btn in pairs(tabButtons) do
     btn.MouseButton1Click:Connect(function()
-        -- Анимация всех кнопок
         for n, b in pairs(tabButtons) do
             animateTabButton(b, n == name)
         end
-
-        -- Анимация контента
         for n, frame in pairs(rightContentFrames) do
             animateContent(frame, n == name)
         end
     end)
 end
 
--- Устанавливаем начальное состояние (первая вкладка активна)
 animateTabButton(tabButtons["Game"], true)
 
 -- ============================================================
@@ -332,4 +452,4 @@ player.PlayerGui.DescendantAdded:Connect(function(child)
     end
 end)
 
-print("✅ AW-SCRIPT с анимацией вкладок загружен!")
+print("✅ AW-SCRIPT (только Teleport) загружен!")
