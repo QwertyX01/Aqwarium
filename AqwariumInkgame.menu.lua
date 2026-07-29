@@ -1,5 +1,5 @@
 -- =====================================================
---  AW-SCRIPT (Универсальный телепорт к финишу)
+--  AW-SCRIPT (Телепорт за safezone)
 --  Вкладка Game: кнопка Teleport to finish
 -- =====================================================
 
@@ -12,7 +12,7 @@ if not player then warn("Игрок не найден") return end
 local TweenService = game:GetService("TweenService")
 
 -- ============================================================
---  ЗАГРУЗКА ЛОГОТИПА (без изменений)
+--  ЗАГРУЗКА ЛОГОТИПА
 -- ============================================================
 local imageUrl = "https://i.ibb.co/MkhPVnWs/Chat-GPT-Image-28-2026-14-13-59.png"
 local fileName = "menu_logo.png"
@@ -157,26 +157,20 @@ rightCorners.CornerRadius = UDim.new(0, 6)
 rightCorners.Parent = rightPanel
 
 -- ============================================================
---  УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ТЕЛЕПОРТА
+--  ФУНКЦИЯ ТЕЛЕПОРТА (ищем safezone, без Raycast)
 -- ============================================================
 local function teleportToFinish()
     local character = player.Character
-    if not character then
-        print("❌ Персонаж не найден")
-        return
-    end
+    if not character then return end
     local hrp = character:FindFirstChild("HumanoidRootPart")
-    if not hrp then
-        print("❌ HumanoidRootPart не найден")
-        return
-    end
+    if not hrp then return end
 
-    -- 1. Ищем финиш (любое название: finish, end, exit, safe, line, doll)
+    -- Ищем safezone (или другие названия)
     local finishTarget = nil
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") or obj:IsA("Model") then
             local name = obj.Name:lower()
-            if name:find("finish") or name:find("end") or name:find("exit") or name:find("safe") or name:find("line") or name:find("doll") then
+            if name:find("safezone") or name:find("finish") or name:find("end") then
                 finishTarget = obj
                 break
             end
@@ -184,57 +178,40 @@ local function teleportToFinish()
     end
 
     if not finishTarget then
-        print("❌ Финиш не найден")
+        warn("❌ SafeZone не найдена")
         return
     end
 
-    -- 2. Определяем позицию финиша
-    local finishPos
+    -- Определяем позицию
+    local targetPos
     if finishTarget:IsA("BasePart") then
-        finishPos = finishTarget.Position
+        targetPos = finishTarget.Position
     elseif finishTarget:IsA("Model") then
         local primary = finishTarget.PrimaryPart or finishTarget:FindFirstChild("HumanoidRootPart") or finishTarget:FindFirstChild("Head")
         if primary then
-            finishPos = primary.Position
+            targetPos = primary.Position
         else
-            local cf, size = finishTarget:GetBoundingBox()
-            finishPos = cf.Position
+            local cf, _ = finishTarget:GetBoundingBox()
+            targetPos = cf.Position
         end
     end
 
-    if not finishPos then
-        print("❌ Не удалось определить позицию финиша")
+    if not targetPos then
+        warn("❌ Не удалось определить позицию SafeZone")
         return
     end
 
-    -- 3. Направление от игрока к финишу
-    local playerPos = hrp.Position
-    local dir = (finishPos - playerPos).Unit
+    -- Смещаемся за safezone (на 10 стёбов вперёд от игрока)
+    local dir = (targetPos - hrp.Position).Unit
+    local finalPos = targetPos + dir * 10
+    finalPos = Vector3.new(finalPos.X, targetPos.Y + 3, finalPos.Z)  -- на уровне safezone + 3
 
-    -- 4. Ставим за финиш на 8 стёбов дальше
-    local targetPos = finishPos + dir * 8
-
-    -- 5. Raycast вниз, чтобы найти землю
-    local rayParams = RaycastParams.new()
-    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
-    rayParams.FilterDescendantsInstances = {character}
-    local rayOrigin = targetPos + Vector3.new(0, 10, 0)
-    local rayDirection = Vector3.new(0, -20, 0)
-    local rayResult = workspace:Raycast(rayOrigin, rayDirection, rayParams)
-
-    if rayResult then
-        targetPos = rayResult.Position + Vector3.new(0, 3, 0)
-    else
-        targetPos = targetPos + Vector3.new(0, 5, 0)
-    end
-
-    -- 6. Телепорт
-    hrp.CFrame = CFrame.new(targetPos)
-    print("✅ Телепорт выполнен! Позиция: " .. tostring(targetPos))
+    hrp.CFrame = CFrame.new(finalPos)
+    print("✅ Телепорт за SafeZone выполнен! Позиция: " .. tostring(finalPos))
 end
 
 -- ============================================================
---  ВКЛАДКИ (анимации без изменений)
+--  ВКЛАДКИ (без изменений)
 -- ============================================================
 local tabNames = {"Game", "Рlayer","Combat", "Misc"}
 local tabButtons = {}
@@ -318,7 +295,6 @@ for i, name in ipairs(tabNames) do
         sc.CornerRadius = UDim.new(0, 6)
         sc.Parent = content
 
-        -- Блок Red Light, Green Light
         local block = Instance.new("Frame")
         block.Size = UDim2.new(0.9, 0, 0, 100)
         block.Position = UDim2.new(0.05, 0, 0, 10)
@@ -350,7 +326,6 @@ for i, name in ipairs(tabNames) do
         separator.BorderSizePixel = 0
         separator.Parent = block
 
-        -- Кнопка Teleport
         local teleportBtn = Instance.new("TextButton")
         teleportBtn.Size = UDim2.new(0.8, 0, 0, 40)
         teleportBtn.Position = UDim2.new(0.1, 0, 0.35, 0)
@@ -387,7 +362,6 @@ for i, name in ipairs(tabNames) do
     end
 end
 
--- Обработчики кликов для всех вкладок
 for name, btn in pairs(tabButtons) do
     btn.MouseButton1Click:Connect(function()
         for n, b in pairs(tabButtons) do
@@ -470,4 +444,4 @@ player.PlayerGui.DescendantAdded:Connect(function(child)
     end
 end)
 
-print("✅ AW-SCRIPT (универсальный телепорт) загружен!")
+print("✅ AW-SCRIPT (телепорт за SafeZone) загружен!")
